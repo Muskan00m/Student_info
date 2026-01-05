@@ -1,0 +1,214 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Student Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-mortarboard-fill"></i> SMS</h4>
+                <p>Student Panel</p>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'student-dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'student-profile' %}">
+                            <i class="bi bi-person-circle"></i> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'upload-documents' %}">
+                            <i class="bi bi-cloud-upload"></i> Upload Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'documents-list' %}">
+                            <i class="bi bi-file-earmark"></i> My Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-mortarboard-fill"></i> Student Management System
+                </a>
+                <h5>User: {{ request.user }}</h1>
+                <h5>Role: {{ request.user.role }}</h2>
+                <!-- Auth-aware navbar links (filled by main.js) -->
+                <div class="navbar-user" id="navbarAuthLinks"></div>
+            </nav>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="bi bi-speedometer2"></i> Student Dashboard</h1>
+                    <p>Welcome back, {{request.user.first_name}}</p>
+                </div>
+                
+                <!-- Statistics Cards -->
+                <div class="row">
+                    <!-- My Documents Card -->
+                    <div class="col-md-3">
+                        <div class="stat-card primary">
+                            <div class="stat-card-icon">
+                                <i class="bi bi-file-earmark-fill"></i>
+                            </div>
+                            <h3>{{document}}</h3>
+                            <p><i class="bi bi-arrow-up"></i> My Documents</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Approved Documents Card -->
+                    <div class="col-md-3">
+                        <div class="stat-card success">
+                            <div class="stat-card-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            {%if document_approved%}
+                            <h3>{{document_approved}}</h3>
+                            <p><i class="bi bi-arrow-up"></i> Approved</p>
+                            {%else%}
+                            <h3>0</h3>
+                            <p><i class="bi bi-arrow-up"></i> Approved</p>   
+                            {%endif%}
+                        </div>
+                    </div>
+                    
+                    <!-- Pending Documents Card -->
+                    <div class="col-md-3">
+                        <div class="stat-card warning">
+                            <div class="stat-card-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            {%if document_pending%}
+                            <h3>{{document_pending}}</h3>
+                            <p><i class="bi bi-exclamation-circle"></i> Pending</p>
+                            {%else%}
+                            <h3>0</h3>
+                            <p><i class="bi bi-exclamation-circle"></i> Pending</p>
+                            {%endif%}
+                        </div>
+                    </div>
+                    
+                    <!-- Rejected Documents Card -->
+                    <div class="col-md-3">
+                        <div class="stat-card danger">
+                            <div class="stat-card-icon">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                            {%if document_rejected%}
+                            <h3>{{document_rejected}}</h3>
+                            <p><i class="bi bi-exclamation-circle"></i> Rejected</p>
+                            {%else%}
+                            <h3>0</h3>
+                            <p><i class="bi bi-exclamation-circle"></i> Rejected</p>
+                            {%endif%}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'upload-documents' %}" class="btn btn-primary w-100">
+                                <i class="bi bi-cloud-upload"></i> Upload Document
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'documents-list' %}" class="btn btn-success w-100">
+                                <i class="bi bi-file-earmark"></i> View My Documents
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'student-profile' %}" class="btn btn-info w-100">
+                                <i class="bi bi-person-circle"></i> Update Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Documents -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-clock-history"></i> Recent Documents</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Document Name</th>
+                                    <th>Type</th>
+                                    <th>Upload Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in document_total%}
+                                <tr>
+                                    <td>{{doc.doc.name|cut:"media/doc/"}}</td>
+                                    <td>{{doc.title}}</td>
+                                    <td>{{doc.uploaded_at}}</td>
+                                    {% if doc.status == "pending" %}
+                                    <td><span class="badge bg-warning status-pending">Pending</span></td>
+                                    {%elif doc.status == "approved" %}
+                                    <td><span class="badge bg-success status-approved">Approved</span></td>
+                                    {%else%}
+                                    <td><span class="badge bg-danger status-rejected">Rejected</span></td>
+                                    {%endif%}
+                                    <td>
+                                        <a href="{% url 'document-preview' doc.id  %}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                                {%endfor%}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Main JS (auth + profile image preview) -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
+

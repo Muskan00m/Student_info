@@ -1,0 +1,174 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents - Student Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-mortarboard-fill"></i> SMS</h4>
+                <p>Student Panel</p>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'student-dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'student-profile' %}">
+                            <i class="bi bi-person-circle"></i> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'upload-documents' %}">
+                            <i class="bi bi-cloud-upload"></i> Upload Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'documents-list' %}">
+                            <i class="bi bi-file-earmark"></i> My Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-mortarboard-fill"></i> Student Management System
+                </a>
+                <div class="navbar-user">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                        {% if profile.photo %}
+                        <img src="{{ profile.photo.url }}"  class="user-avatar">
+                        {% else %}
+                        <img src="https://via.placeholder.com/40" class="user-avatar">
+                        {% endif %}  
+                        <span>{{request.user.username}}</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'student-profile' %}"><i class="bi bi-person"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'login' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="bi bi-cloud-upload"></i> Upload Documents</h1>
+                    <p>Upload your academic documents for approval</p>
+                    {% if messages %}
+                    {% for message in messages %}
+                        <p style="color: blue;">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+                </div>
+                
+                <!-- Upload Form -->
+                <div class="form-card">
+                    <form action="upload-documents" method="POST" enctype="multipart/form-data">
+                        {%csrf_token%}
+                        <!-- Document Type -->
+                        <div class="form-group">
+                            <label for="documentType" class="form-label">Document Type / Title*</label>
+                            <select class="form-select" id="documentType" name="title" required>
+                                <option value="">Select Document Type</option>
+                                <option value="transcript">Transcript</option>
+                                <option value="certificate">Certificate</option>
+                                <option value="id_card">ID Card</option>
+                                <option value="marksheet">Marksheet</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Document Description -->
+                        <div class="form-group">
+                            <label for="documentDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="documentDescription" name="discrip" rows="3" placeholder="Enter document description (optional)"></textarea>
+                        </div>
+                        
+                        <!-- File Upload Area (actual upload handled by Django backend) -->
+                        <div class="form-group">
+                            <label class="form-label">Upload Document *</label>
+                            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                            <!-- <div class="upload-area"> -->
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-upload"></i>
+                                </div>
+                                <h5>Click to choose a file</h5>
+                                <p class="text-muted">PDF, DOC, DOCX, JPG, PNG (Max 10MB)</p>
+                                <!-- Django backend will handle file validation -->
+                                <input type="file" id="fileInput" name="doc" class="d-none" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required onchange="previewDocument(this, 'fileList')">
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Files List -->
+                        <div class="file-list" id="fileList"></div>
+                        
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i> Upload Document
+                            </button>
+                            <a href="{% url 'documents-list' %}"class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Upload Guidelines -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> Upload Guidelines</h5>
+                    </div>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-check-circle text-success"></i> Only PDF, DOC, DOCX, JPG, and PNG files are allowed</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Maximum file size: 10MB per document</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Ensure documents are clear and readable</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Documents will be reviewed by admin/staff</li>
+                        <li><i class="bi bi-check-circle text-success"></i> You will be notified once your document is approved or rejected</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Small UI helpers (image/file previews only, no auth logic) -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
+

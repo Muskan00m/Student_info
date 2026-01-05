@@ -1,0 +1,241 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Approval - Student Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Dashboard Wrapper -->
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-mortarboard-fill"></i> SMS</h4>
+                <p>Admin Panel</p>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin-dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manage-staff' %}">
+                            <i class="bi bi-people"></i> Manage Staff
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manage-students' %}">
+                            <i class="bi bi-person-badge"></i> Manage Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'document-approval' %}">
+                            <i class="bi bi-file-check"></i> Document Approval
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin-profile' %}">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" ref="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-mortarboard-fill"></i> Student Management System
+                </a>
+                <div class="navbar-user">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                        {% if profile.photo %}
+                        <img src="{{ profile.photo.url }}"  class="user-avatar">
+                        {% else %}
+                        <img src="https://via.placeholder.com/40" class="user-avatar">
+                        {% endif %}  
+                        <span>{{request.user.username}}</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'admin-profile' %}"><i class="bi bi-person"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" ref="{% url 'login' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="bi bi-file-check"></i> Document Approval</h1>
+                    <p>Review and approve student documents</p>
+                </div>
+                
+                <!-- Status Tabs -->
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                            <i class="bi bi-clock-history"></i> Pending <span class="badge bg-warning">{{doc_pending}}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approved" type="button">
+                            <i class="bi bi-check-circle"></i> Approved <span class="badge bg-success">{{doc_approved}}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
+                            <i class="bi bi-x-circle"></i> Rejected <span class="badge bg-danger">{{doc_rejected}}</span>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        <div class="content-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Document ID</th>
+                                            <th>Student Name</th>
+                                            <th>Roll No.</th>
+                                            <th>Document Type</th>
+                                            <th>Document Name</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doc in document%}
+                                        {% if doc.status == "pending"%}
+                                        <tr>
+                                            <td>{{doc.id}}</td>
+                                            <td>{{doc.student.full_name}}</td>
+                                            <td>{{doc.student.roll_number}}</td>
+                                            <td>{{doc.title}}</td>
+                                            <td>{{doc.doc.name|cut:"media/doc/"}}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> View</button>
+                                                <button class="btn btn-sm btn-outline-success"><i class="bi bi-check"></i>  <a href="{% url 'approve_document' doc.id %}" >Approve</a></button>
+                                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i><a href="{% url 'reject_document' doc.id %}" >Reject</a></button>
+                                            </td>
+                                        </tr>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Approved Tab -->
+                    <div class="tab-pane fade" id="approved" role="tabpanel">
+                        <div class="content-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Document ID</th>
+                                            <th>Student Name</th>
+                                            <th>Roll No.</th>
+                                            <th>Document Type</th>
+                                            <th>Uploaded At</th>
+                                            <th>Approved By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doc in document%}
+                                        {% if doc.status == "approved"%}
+                                        <tr>
+                                            <td>{{doc.id}}</td>
+                                            <td>{{doc.student.full_name}}</td>
+                                            <td>{{doc.student.roll_number}}</td>
+                                            <td>{{doc.title}}</td>
+                                            <td>{{doc.uploaded_at}}</td>
+                                            <td>{{request.user.role}}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> View</button>
+                                            </td>
+                                        </tr>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel">
+                        <div class="content-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Document ID</th>
+                                            <th>Student Name</th>
+                                            <th>Roll No.</th>
+                                            <th>Document Type</th>
+                                            <th>Document Name</th>
+                                            <th>Uploaded At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for doc in document%}
+                                        {% if doc.status == "rejected"%}
+                                        <tr>
+                                            <td>{{doc.id}}</td>
+                                            <td>{{soc.student.full_name}}</td>
+                                            <td>{{doc.student.roll_number}}</td>
+                                            <td>{{doc.title}}</td>
+                                            <td>{{doc.doc.name|cut:"media/doc/"}}</td>
+                                            <td>{{doc.uploaded_at}}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> View</button>
+                                            </td>
+                                        </tr>
+                                        {%endif%}
+                                        {%endfor%}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

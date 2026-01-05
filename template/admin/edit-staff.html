@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Student Management System</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <!-- ================= Sidebar ================= -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h4><i class="bi bi-mortarboard-fill"></i> SMS</h4>
+                <p>Student Management</p>
+            </div>
+
+            <nav class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin-dashboard' %}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'admin-profile' %}">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link js-logout" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- ================= Main Content ================= -->
+        <main class="main-content">
+
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-mortarboard-fill"></i> Student Management System
+                </a>
+
+                <div class="navbar-user dropdown">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
+                        <img src="https://via.placeholder.com/40" class="user-avatar">
+                        <span>John Doe</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="bi bi-person"></i> Profile</a></li>
+                        <li><a class="dropdown-item" href="#">
+                                <i class="bi bi-gear"></i> Settings</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item js-logout" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- ================= Content Area ================= -->
+            <div class="content-area">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1><i class="bi bi-person-circle"></i> My Profile</h1>
+                    <p>Manage your profile information and photo</p>
+                    <h5>User: {{ user_data.username }}</h1>
+                        <h5>Authenticated: {{ user_data.role}}</h2>
+                </div>
+
+                <!-- ================= Profile Container ================= -->
+                <div class="profile-container">
+                    <!-- Profile Image Sidebar -->
+                    <div class="profile-sidebar">
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'edit-staff' staff_data.user_id %}">
+                            <div class="profile-image-container">
+                                {% if profile.photo %}
+                                    <img src="{{profile.photo.url }}" alt="Profile Photo" id="defaultProfileImage"
+                                    class="profile-image">
+
+                                {% else %}
+                                <img src="{% static 'images/default.png' %}" alt="Default Photo"
+                                    id="defaultProfileImage" class="profile-image">
+
+                                {% endif %}
+
+                                <img src="" id="profileImagePreview" class="profile-image-preview">
+
+                                <label for="profileUpload" class="profile-upload-btn">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+
+                                <!-- File input (connected to form) -->
+                                <input type="file" id="profileUpload" name="photo" class="profile-upload-input"
+                                    accept="image/*" onchange="previewProfileImage(this)">
+                            </div>
+
+                            <h3>John Doe</h3>
+                            <p class="text-muted">{{user_data.role}}</p>
+
+                            <p class="text-muted small mt-3">
+                                <i class="bi bi-info-circle"></i>
+                                Click the camera icon to upload a new profile photo
+                            </p>
+                    </div>
+
+                    <!-- ================= Profile Form ================= -->
+                    <div class="profile-details">
+
+                        <h4 class="mb-4">Profile Information</h4>
+
+                        <!-- Django Form -->
+                        <!-- <form method="POST" enctype="multipart/form-data" action="profile"> -->
+                        {% csrf_token %}
+
+                        <!-- Full Name -->
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Full Name</div>
+                            <input type="text" name="first_name" class="form-control"
+                                value="{{ user_data.first_name }}" x disabled>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Email Address</div>
+                            <input type="email" name="email" class="form-control" value="{{ user_data.email}}"
+                                disabled>
+                        </div>
+
+                        <!-- Role (Read Only) -->
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Role</div>
+                            <input type="text" class="form-control" value="{{ user_data.role}}" readonly disabled>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Phone Number</div>
+                            <input type="text" name="phone" value="{{profile.phone}}" class="form-control"
+                                placeholder="+1 234 567 8900">
+                        </div>
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Department</div>
+                            <input type="text"
+                                   name="department"
+                                   class="form-control"
+                                   value="{{staff_data.department}}"
+                                   placeholder="steam name">
+                        </div>
+                        <div class="profile-detail-item">
+                            <div class="profile-detail-label">Address</div>
+                            <input type="text"
+                                   name = "address"
+                                   class="form-control"
+                                   value="{{staff_data.address}}"
+                                   placeholder="cit name"
+                                   >
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Profile Image Preview JS (ONLY preview logic) -->
+    <script>
+        function previewProfileImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profileImagePreview').src = e.target.result;
+                    document.getElementById('profileImagePreview').style.display = 'block';
+                    document.getElementById('defaultProfileImage').style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
