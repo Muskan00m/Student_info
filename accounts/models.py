@@ -11,7 +11,7 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='media/photo', blank=True, null=True)
+    photo = models.ImageField(upload_to='photo/', blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True)
 
     def __str__(self):

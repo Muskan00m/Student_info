@@ -10,7 +10,7 @@ class StudentDocument(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE  , limit_choices_to={'role': 'student'})
     title = models.CharField(max_length=100)
     discrip = models.TextField(max_length=300)
-    doc = models.FileField(upload_to='media/doc')
+    doc = models.FileField(upload_to='doc/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(
         max_length=10,
