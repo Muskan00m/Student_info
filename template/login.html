@@ -1,4 +1,5 @@
 {%load static%}
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -82,7 +83,8 @@
 
                 <div class="text-center mt-3">
                     <span class="text-muted">New here?</span>
-                    <a href="{% url 'register' %}" class="fw-semibold">Create an account</a>
+                    <a href="{% url 'register' %}" class="fw-semibold">Create an account</a><br>
+                    <a href="{% provider_login_url 'google' %}" class="fw-semibold"><i class="bi bi-google"></i>Login with Google</a>
                 </div>
             </form>
         </div>

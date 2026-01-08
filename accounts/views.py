@@ -7,6 +7,7 @@ from accounts.models import User , Profile
 from staff.models import  staff
 from student.models import Student
 from document.models import StudentDocument
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 User = get_user_model()
@@ -66,7 +67,7 @@ def logins(request):
             login(request , user)
 
             if user.role =="admin":
-                return redirect("admin/dashboard")
+                return redirect("admin-dashboard")
             elif user.role =="staff":
                 return redirect("staff/dashboard")
             elif user.role =="student":
@@ -80,6 +81,19 @@ def logins(request):
     else:
         return render(request , "login.html")
 
+
+@login_required
+def redirect_dashboard(request):
+    user = request.user
+    if user.role == "admin":
+        return redirect("admin-dashboard")
+    elif user.role == "staff":
+        return redirect("staff/dashboard")
+    elif user.role == "student":
+        return redirect("student/dashboard")
+    else:
+        return redirect("login")
+    
 
 @login_required(login_url='/logins/')
 def admin_dashboard(request):
