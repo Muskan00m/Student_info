@@ -1,6 +1,7 @@
 {%load static%}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+
 <body>
     <!-- Public Navbar (static; auth handled by Django backend) -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
@@ -32,7 +34,7 @@
                         <a class="nav-link" href="{% url 'index' %}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}" >Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="{% url 'register' %}">Register</a>
@@ -50,10 +52,10 @@
                 <!-- Actual registration, validation and role assignment are handled by Django backend -->
                 Fill in your details below. The server will validate and create your account.
                 {% if messages %}
-                    {% for message in messages %}
-                        <p style="color: blue;">{{ message }}</p>
-                    {% endfor %}
-                {% endif %}
+                {% for message in messages %}
+            <p style="color: blue;">{{ message }}</p>
+            {% endfor %}
+            {% endif %}
             </p>
 
             <!-- Register Form (processed by Django backend view) -->
@@ -63,14 +65,16 @@
                     <label for="registerName" class="form-label">Full Name</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="registerName" name="first_name" placeholder="Enter your full name" required>
+                        <input type="text" class="form-control" id="registerName" name="first_name"
+                            placeholder="Enter your full name" required>
                     </div>
                 </div>
                 <div class="mb-3">
                     <label for="registerName" class="form-label">Username</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" id="registerusername" name="username" placeholder="Enter your username" required>
+                        <input type="text" class="form-control" id="registerusername" name="username"
+                            placeholder="Enter your username" required>
                     </div>
                 </div>
 
@@ -78,7 +82,8 @@
                     <label for="registerEmail" class="form-label">Email Address</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input type="email" class="form-control" id="registerEmail" name="email" placeholder="name@college.edu" required>
+                        <input type="email" class="form-control" id="registerEmail" name="email"
+                            placeholder="name@college.edu" required>
                     </div>
                 </div>
 
@@ -87,7 +92,6 @@
                     <select class="form-select" id="registerRole" name="role" required>
                         <option value="">Select Role</option>
                         <option value="staff">Staff</option>
-                        <option value="student">Student</option>
                     </select>
                 </div>
 
@@ -95,7 +99,8 @@
                     <label for="registerPassword" class="form-label">Password</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control" id="registerPassword" name="password" placeholder="Create a password" required>
+                        <input type="password" class="form-control" id="registerPassword" name="password"
+                            placeholder="Create a password" required>
                     </div>
                 </div>
 
@@ -103,7 +108,8 @@
                     <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                        <input type="password" class="form-control" id="registerConfirmPassword" name="password_confirm" placeholder="Re-enter password" required>
+                        <input type="password" class="form-control" id="registerConfirmPassword" name="password_confirm"
+                            placeholder="Re-enter password" required>
                     </div>
                 </div>
 
@@ -125,7 +131,5 @@
     <!-- Main JS -->
     <script src="{% static 'js/main.js' %}"></script>
 </body>
+
 </html>
-
-
-
