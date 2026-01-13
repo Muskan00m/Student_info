@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.http import HttpResponse
 from accounts.tasks import send_welcome_email
+from .utils import generate_jwt
+from rest_framework_simplejwt.tokens import AccessToken
+
 
 
 # Create your views here.
@@ -71,6 +74,12 @@ def logins(request):
 
             login(request , user)
 
+            tokens = generate_jwt(user)
+
+            request.session['access_token'] = tokens['access']
+            request.session['refresh_token'] = tokens['refresh']
+
+
             if user.role =="admin":
                 return redirect("admin-dashboard")
             elif user.role =="staff":
@@ -102,6 +111,12 @@ def redirect_dashboard(request):
 
 @login_required(login_url='/logins/')
 def admin_dashboard(request): 
+    token = request.session.get('access_token')
+    print("token created ")
+
+    if not token:
+        return redirect("login")
+    
     if request.user.role != 'admin':
         messages.error(request, "Unauthorized access")
         return redirect('login')
@@ -297,3 +312,11 @@ def cache_test(request):
     value = cache.get("test_key")
     return HttpResponse(value)
 
+def test_jwt(request):
+    token = request.session.get('access_token')
+
+    decoded = AccessToken(token)
+    return HttpResponse(f"""
+        USER ID : {decoded['user_id']} <br>
+        EXPIRES : {decoded['exp']}
+    """)

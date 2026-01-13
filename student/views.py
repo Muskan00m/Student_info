@@ -8,6 +8,12 @@ from document.models import StudentDocument
 # Create your views here.
 @login_required(login_url='/logins/')
 def student_dashboard(request):
+    token = request.session.get('access_token')
+    print("token created ")
+
+    if not token:
+        return redirect("login")
+    
     if request.user.role != 'student':
         messages.error(request, "Unauthorized access")
         return redirect('login')

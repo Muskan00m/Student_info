@@ -10,6 +10,13 @@ from document.models import StudentDocument
 # Create your views here.
 @login_required(login_url='/logins/')
 def staff_dashboard(request):
+    token = request.session.get('access_token')
+    print("JWT TOKEN - token is created")
+    
+    if not token:
+        print("Token is expired ❌")
+        return redirect("login")
+    
     if request.user.role != 'staff':
         messages.error(request, "Unauthorized access")
         return redirect('login')

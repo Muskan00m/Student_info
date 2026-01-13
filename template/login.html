@@ -95,6 +95,15 @@
 
     <!-- Main JS (handles dummy login + navbar) -->
     <script src="{% static 'js/main.js' %}"></script>
+    <!-- <script>
+        fetch("/api/dashboard/", {
+            headers: {
+                "Authorization": "Bearer {{ request.session.access_token }}"
+            }
+        })
+        .then(res => res.json())
+        .then(data => console.log(data))
+    </script> -->
 </body>
 </html>
 

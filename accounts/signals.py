@@ -3,6 +3,9 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from accounts.models import Profile
 from staff.models import staff
+from django.dispatch import receiver
+from allauth.account.signals import user_logged_in
+from .utils import generate_jwt
 
 User = get_user_model()
 
@@ -11,3 +14,8 @@ def create_related_profiles(sender, instance, created, **kwargs):
     if created:
         if instance.role == "staff":
             staff.objects.get_or_create(user=instance)
+
+@receiver(user_logged_in)
+def create_jwt_on_google_login(request, user, **kwargs):
+    tokens = generate_jwt(user)
+    request.session['access_token'] = tokens['access']

@@ -6,6 +6,7 @@ urlpatterns = [
     path("",views.index,name="index"),
     path("register", views.register, name ="register"),
     path("login", views.logins, name ="login"),
+    path("test-jwt/", views.test_jwt),
     path("dashboard", views.admin_dashboard, name ="admin-dashboard"),
     path("dashboard/profile", views.admin_profile, name ="admin-profile"),
     path("dashboard/manage-staff", views.manage_staff, name ="manage-staff"),
