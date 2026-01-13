@@ -8,6 +8,10 @@ from staff.models import  staff
 from student.models import Student
 from document.models import StudentDocument
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.http import HttpResponse
+from accounts.tasks import send_welcome_email
+
 
 # Create your views here.
 User = get_user_model()
@@ -44,9 +48,10 @@ def register(request):
             password= password
         )
         user.save()
+        send_welcome_email.delay(email, first_name)
         if role == 'staff':
             staff_data = staff.objects.get_or_create(user = user)
-            return redirect("admin/dashboard")
+            return redirect("staff/dashboard")
         
         messages.success(request , "register successfully")
         return redirect("login")  
@@ -96,24 +101,43 @@ def redirect_dashboard(request):
     
 
 @login_required(login_url='/logins/')
-def admin_dashboard(request):
+def admin_dashboard(request): 
     if request.user.role != 'admin':
         messages.error(request, "Unauthorized access")
         return redirect('login')
-    user = User.objects.order_by("id")[5:]
-    total_student = Student.objects.all().count()
-    total_staff = staff.objects.all().count()
-    total_document = StudentDocument.objects.count()
-    total_pending = StudentDocument.objects.filter(status = "pending").count()
-    documents = StudentDocument.objects.select_related('student' , 'student__user')
-    doc_map = {}
-    for d in documents:
-        doc_map[d.student.user_id] = d
 
-    # 🔥 har user ke saath uska document attach karo
-    for u in user:
-        u.doc = doc_map.get(u.id)   # agar document nahi → None
-    return render(request, 'admin/dashboard.html', {"user":user , "total_student":total_student , "total_document":total_document , "total_staff":total_staff , "total_pending":total_pending })
+    dashboard_data = cache.get("admin_dashboard")
+    if dashboard_data is None:
+        print("cache mempory")
+
+        user = User.objects.order_by("id")[5:]
+        total_student = Student.objects.all().count()
+        total_staff = staff.objects.all().count()
+        total_document = StudentDocument.objects.count()
+        total_pending = StudentDocument.objects.filter(status = "pending").count()
+        documents = StudentDocument.objects.select_related('student' , 'student__user')
+        doc_map = {}
+        for d in documents:
+            doc_map[d.student.user_id] = d
+
+        # 🔥 har user ke saath uska document attach karo
+        for u in user:
+            u.doc = doc_map.get(u.id)   # agar document nahi → None
+
+        dashboard_data = {
+            "user": user,
+            "total_student": total_student,
+            "total_staff": total_staff,
+            "total_document": total_document,
+            "total_pending": total_pending,
+            "documents":documents
+        }
+        
+        cache.set("admin_dashboard", dashboard_data, 30)
+    else:
+        print("redis se aaraha hai data")
+    # return render(request, 'admin/dashboard.html', {"user":user , "total_student":total_student , "total_document":total_document , "total_staff":total_staff , "total_pending":total_pending })
+    return render(request, "admin/dashboard.html", dashboard_data)
 
 @login_required(login_url='/logins/')
 def staff_dashboard(request):
@@ -143,12 +167,28 @@ def admin_profile(request):
     return render(request, "admin/profile.html" ,{"profile": profile})
 
 def document_approval(request):
-    profile = Profile.objects.get(user_id = request.user.id)
-    document = StudentDocument.objects.select_related('student')
-    doc_pending = StudentDocument.objects.filter(status = "pending").count()
-    doc_approved = StudentDocument.objects.filter(status = "approved").count()
-    doc_rejected = StudentDocument.objects.filter(status = "rejected").count()
-    return render(request , "admin/document-approval.html" , {"document":document , "profile":profile , "doc_pending":doc_pending ,"doc_approved":doc_approved, "doc_rejected":doc_rejected})
+    document_data = cache.get("document_approval")
+
+    if document_data is None:
+        print("db data document")
+        profile = Profile.objects.get(user_id = request.user.id)
+        document = StudentDocument.objects.select_related('student')
+        doc_pending = StudentDocument.objects.filter(status = "pending").count()
+        doc_approved = StudentDocument.objects.filter(status = "approved").count()
+        doc_rejected = StudentDocument.objects.filter(status = "rejected").count()
+        
+        document_data = {
+            "profile":profile,
+            "document": document,
+            "doc_pending" : doc_pending,
+            "doc_approved" : doc_approved,
+            "doc_rejected" : doc_rejected,
+        }
+        cache.set("document_approval",document_data , 30)
+    else:
+        print("redis data")
+    # return render(request , "admin/document-approval.html" , {"document":document , "profile":profile , "doc_pending":doc_pending ,"doc_approved":doc_approved, "doc_rejected":doc_rejected})
+    return render(request , "admin/document-approval.html" ,document_data)
 
 @login_required
 def manage_students(request):
@@ -250,4 +290,10 @@ def delete_student(request , user_id):
     user.delete()
     staff_info = staff.objects.select_related('user')
     return render(request , "admin/all-students.html",{"staff_info":staff_info })
+
+
+def cache_test(request):
+    cache.set("test_key", "Hello Momo", timeout=60)
+    value = cache.get("test_key")
+    return HttpResponse(value)
 

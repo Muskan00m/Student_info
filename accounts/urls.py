@@ -17,6 +17,7 @@ urlpatterns = [
     path('reject/<int:id>/', views.reject_document, name='reject_document'),
     path('delete/<int:id>/', views.delete_user, name='delete_user'),
     path('redirect-dashboard/', views.redirect_dashboard, name='redirect-dashboard'),
+    path("cache-test/", views.cache_test , name = 'cache_test'),
 ]
 
 
