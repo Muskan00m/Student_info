@@ -6,6 +6,7 @@ from accounts.models import User , Profile
 from staff.models import  staff
 from student.models import Student
 from document.models import StudentDocument
+from accounts.tasks import send_notification_email
 
 # Create your views here.
 @login_required(login_url='/logins/')
@@ -31,7 +32,7 @@ def staff_dashboard(request):
 
 @login_required
 def staff_profile(request):
-    staff_data= staff.objects.filter(user=request.user)
+    staff_data= staff.objects.get(user_id=request.user.id)
     profile, created = Profile.objects.get_or_create(user=request.user)
     user_data = request.user
     # staff_data = staff.objects.get(user = request.user)
@@ -43,7 +44,13 @@ def staff_profile(request):
 
         staff_data.department = request.POST['department']
         staff_data.address = request.POST['address']
-        staff_data.update()
+        staff_data.save()
+
+        send_notification_email.delay(
+        "update profile",
+        "Your profile has been uploaded.",
+        user_data.email
+        )
 
         return redirect("profile")
     
@@ -99,6 +106,11 @@ def add_student(request):
                                                 guardian_name = guardian_name , guardian_phone = guardian_phone
                                                 )
             student.save()
+            send_notification_email.delay(
+            "created profile",
+            " welcome... Your profile has been created .",
+            user.email
+            )
             messages.success(request, "Student created successfully")
             return redirect("dashboard")
         
@@ -127,21 +139,7 @@ def edit_student(request , student_id):
         guardian_name = request.POST["guardian_name"]
         guardian_phone = request.POST["guardian_phone"]
 
-    #     st = Student.objects.filter(roll_number = roll_number).first() 
-    #     if st:
-    #         st.email = email
-    #         st.guardian_phone = guardian_phone
-    #         st.save()
-    #         return redirect("all-students")
 
-    #     student = Student.objects.create(user = user,
-    #                                      full_name = full_name ,email=email ,
-    #                                      roll_number = roll_number,
-    #                                      phone = phone , date_of_birth = date_of_birth ,
-    #                                      gender = gender , course = course , year = year ,
-    #                                      semester = semester , address = address , 
-    #                                      guardian_name = guardian_name , guardian_phone = guardian_phone
-    #                                      )
         student.full_name = full_name
         student.phone = phone
         student.address = address
@@ -153,6 +151,11 @@ def edit_student(request , student_id):
         student.guardian_name = guardian_name
         student.guardian_phone = guardian_phone
         student.save()
+        send_notification_email.delay(
+            "update profile",
+            " welcome... Your profile has been updated .",
+            student.email
+            )
 
         full_name = request.POST["full_name"]
         user.first_name = full_name
@@ -172,6 +175,11 @@ def all_students(request):
 def delete_student(request , user_id):
     user = get_object_or_404(User , id=user_id , role ="student" )
     user.delete()
+    send_notification_email.delay(
+            "delete account",
+            " your account has been deleted.",
+            user.email
+            )
     return render(request , "staff/all-students.html",)
 
 @login_required

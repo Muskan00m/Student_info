@@ -13,6 +13,7 @@ from django.http import HttpResponse
 from accounts.tasks import send_welcome_email
 from .utils import generate_jwt
 from rest_framework_simplejwt.tokens import AccessToken
+from accounts.tasks import send_notification_email
 
 
 
@@ -177,6 +178,11 @@ def admin_profile(request):
         if 'photo' in request.FILES:
             profile.photo = request.FILES['photo']
         profile.save()
+        send_notification_email.delay(
+        "update profile",
+        "Your profile has been uploaded.",
+        request.user.email
+        )
         return redirect("profile")
     
     return render(request, "admin/profile.html" ,{"profile": profile})
@@ -246,10 +252,20 @@ def edit_staff(request , id):
 
         profile.phone = request.POST['phone']
         profile.save()
+        send_notification_email.delay(
+        "update profile",
+        "Your profile has been uploaded.",
+        staff_data.email
+        )
 
         staff_data.department = request.POST["department"]
         staff_data.address = request.POST["address"]
         staff_data.save()
+        send_notification_email.delay(
+        "update profile",
+        "Your profile has been uploaded.",
+        staff_data.email
+        )
         return redirect("edit-staff", id=staff_data.user_id)
     
     return render(request , "admin/edit-staff.html", {"staff_data":staff_data , "user_data":user_data , "profile":profile})
@@ -267,6 +283,13 @@ def approve_document(request, id):
     student = Student.objects.get(id = doc.student_id)
     student.approved = True
     student.save()
+    
+    send_notification_email.delay(
+        "Document Approved",
+        "Your document has been approved by admin.",
+        doc.student.email
+    )
+    print(doc.student.email)
 
     return redirect("document-approval")
 
@@ -283,6 +306,13 @@ def reject_document(request, id):
     student.approved = False
     student.save()
 
+    print(student.email)
+    send_notification_email.delay(
+        "Document Rejected",
+        "Your document has been rejected by admin.",
+        student.email
+    )
+
     return redirect("document-approval")
 
 
@@ -295,6 +325,11 @@ def admin_documents_by_status(request, status):
 def delete_user(request , id):
     user = get_object_or_404(User , id=id , role ="staff" )
     user.delete()
+    send_notification_email.delay(
+        "account delete",
+        "Your account has been delted.",
+        user.email
+    )
     profile = Profile.objects.get(user_id = request.user.id)
     staff_info = staff.objects.select_related('user')
     return render(request  , "admin/manage-staff.html",  {"staff_info":staff_info ,"profile":profile})
@@ -303,6 +338,11 @@ def delete_user(request , id):
 def delete_student(request , user_id):
     user = get_object_or_404(User , id=user_id , role ="student" )
     user.delete()
+    send_notification_email.delay(
+        "account delete",
+        "Your account has been deleted.",
+        user.email
+    )
     staff_info = staff.objects.select_related('user')
     return render(request , "admin/all-students.html",{"staff_info":staff_info })
 

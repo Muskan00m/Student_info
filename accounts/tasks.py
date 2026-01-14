@@ -19,3 +19,13 @@ def send_welcome_email(email, first_name):
         fail_silently=False,
     )
     return "Email sent successfully"
+
+@shared_task
+def send_notification_email(subject, message, to_email):
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [to_email],
+        fail_silently=False
+    )

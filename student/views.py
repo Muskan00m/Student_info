@@ -4,6 +4,7 @@ from django.contrib import messages
 from student.models import Student
 from accounts.models import User , Profile
 from document.models import StudentDocument
+from accounts.tasks import send_notification_email
 
 # Create your views here.
 @login_required(login_url='/logins/')
@@ -57,6 +58,12 @@ def student_profile(request):
         if 'photo' in request.FILES:
             profile.photo = request.FILES['photo']
         profile.save()
+
+        send_notification_email.delay(
+            "update profile",
+            " Your profile has been updated ...",
+            stud.email
+            )
         
         return redirect("student-profile")
     return render(request, "student/profile.html" , {"stud":stud , "profile":profile})
@@ -85,6 +92,11 @@ def upload_documents(request):
         discrip= request.POST['discrip']
         document = StudentDocument.objects.create(student= student ,title=title , doc = doc, discrip= discrip)
         document.save()
+        send_notification_email.delay(
+            "upload document",
+            " your document has been uploaded ",
+            student.email
+            )
         messages.success(request, "Document uploaded successfully")
         return redirect("student-dashboard")
     profile  = Profile.objects.get(user_id = request.user.id)

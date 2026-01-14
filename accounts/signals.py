@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save , post_delete
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from accounts.models import Profile
@@ -6,6 +6,7 @@ from staff.models import staff
 from django.dispatch import receiver
 from allauth.account.signals import user_logged_in
 from .utils import generate_jwt
+from student.models import Student
 
 User = get_user_model()
 
