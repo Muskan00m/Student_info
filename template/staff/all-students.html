@@ -99,7 +99,7 @@
                 <div class="content-card">
                     <div class="card-header">
                         <h5>Student List</h5>
-                        <a href="add-student.html" class="btn btn-primary btn-sm">
+                        <a href="{% url 'add-student'%}" class="btn btn-primary btn-sm">
                             <i class="bi bi-person-plus"></i> Add New Student
                         </a>
                     </div>
@@ -113,7 +113,6 @@
                                     <th>Course</th>
                                     <th>Year</th>
                                     <th>Phone</th>
-                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -126,8 +125,6 @@
                                     <td>{{students.course}}</td>
                                     <td>{{students.year}}</td>
                                     <td> {{students.phone}}</td>
-
-                                    <td><span class="badge bg-success">Active</span></td>
                                     <td>
                                         <a href="{% url 'edit-student' students.user_id  %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
                                         <a href="{% url 'delete-student' students.user_id  %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>

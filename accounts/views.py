@@ -183,7 +183,7 @@ def admin_profile(request):
         "Your profile has been uploaded.",
         request.user.email
         )
-        return redirect("profile")
+        return redirect("admin-profile")
     
     return render(request, "admin/profile.html" ,{"profile": profile})
 
